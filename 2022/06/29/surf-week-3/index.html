@@ -1,0 +1,1961 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.101.0" />
+
+
+<title>SURF WEEK 3 - A Hugo website</title>
+<meta property="og:title" content="SURF WEEK 3 - A Hugo website">
+
+
+  <link href='https://kunyanghe21.github.io/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="https://github.com/rstudio/blogdown">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/rstudio">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">51 min read</span>
+    
+
+    <h1 class="article-title">SURF WEEK 3</h1>
+
+    
+    <span class="article-date">2022-06-29</span>
+    
+
+    <div class="article-content">
+      
+
+
+<p>Time: 18:00-22:00, June 24th, 2022
+Venue: Tencent Meeting.
+Attendees: Chengxiu Ling, SURF team and volunteers (3+4), Master Students (4)</p>
+<div id="introduction-to-inla" class="section level3">
+<h3>Introduction to INLA</h3>
+</div>
+<div id="bayesian-inference" class="section level2">
+<h2>Bayesian Inference</h2>
+<p>In order to describe the models that INLA can fit, a vector of n observations <span class="math inline">\(\mathbf{y}=\left(y_{1}, \ldots, y_{n}\right)\)</span> will be considered. Note that some of them may be missing observations. Furthermore, these observations will have an associated likelihood (not necessarily from the exponential family). In general, mean <span class="math inline">\(\mu_{i}\)</span> of observation <span class="math inline">\(y_{i}\)</span> can be linked to the linear predictor <span class="math inline">\(\eta_{i}\)</span> via a convenient function. Observations will be independent given its linear predictor, i.e.,</p>
+<p><span class="math display">\[\eta_{i}=\alpha+\sum_{j=1}^{n_{\beta}} \beta_{j} z_{j i}+\sum_{k=1}^{n_{f}} f^{(k)}\left(u_{k i}\right)+\varepsilon_{i} ; i=1, \ldots, n\]</span></p>
+<p>Here, <span class="math inline">\(\alpha\)</span> is the intercept, <span class="math inline">\(\beta_{j}, j=1, \ldots, n_{\beta}\)</span> , coefficients of some covariates <span class="math inline">\(\left\{\mathbf{z}_{j}\right\}_{j=1}^{n_{\beta}}\)</span> , functions <span class="math inline">\(f^{(k)}\)</span> define <span class="math inline">\(n_{f}\)</span> random effects on some vector of covariates <span class="math inline">\(\left\{\mathbf{u}_{k}\right\}_{k=1}^{n}\)</span> . Finally, <span class="math inline">\(\varepsilon_{i}\)</span> is an error term, that may be missing depending on the likelihood. Within the INLA framework, the vector of latent effects <span class="math inline">\(\mathbf{x}\)</span> will be represented as follows:</p>
+<p><span class="math inline">\(\mathbf{x}=\left(\eta_{1}, \ldots, \eta_{n}, \alpha, \beta_{1}, \ldots\right)\)</span></p>
+<p>Havard Rue, Martino, and Chopin (2009) make further assumptions about the model and consider that this latent structure is that of a GMRF (Rue and Held 2005). Also, observations are considered to be independent given latent effects <span class="math inline">\(\mathbf{x}\)</span> , whose distributions depend on a vector of hyperparameters <span class="math inline">\(\boldsymbol{\theta}_{1}\)</span> . The latent GRMF structure of the model will have zero mean and precision matrix <span class="math inline">\(\mathbf{Q}\left(\boldsymbol{\theta}_{2}\right)\)</span> , which will depend on a vector of hyperparameters <span class="math inline">\(\theta_{2}\)</span> . To simplify notation we will consider <span class="math inline">\(\theta=\left(\theta_{1}, \theta_{2}\right)\)</span> and will avoid referring to <span class="math inline">\(\theta_{1}\)</span> or <span class="math inline">\(\theta_{2}\)</span> individually. Given the structure of GMRF, precision matrix <span class="math inline">\(Q(\theta)\)</span> will often be very sparse. INLA will take advantage of this sparse structure as well as conditional independence properties of GMRFs in order to speed up computations.</p>
+</div>
+<div id="bayesian-formula" class="section level2">
+<h2>Bayesian formula</h2>
+<p>The posterior distribution of the latent effects <span class="math inline">\(\mathbf{x}\)</span> can then be written down as:</p>
+<p><span class="math display">\[\pi(\mathbf{x}, \boldsymbol{\theta} \mid \mathbf{y})=\frac{\pi(\mathbf{y} \mid \mathbf{x}, \boldsymbol{\theta}) \pi(\mathbf{x}, \boldsymbol{\theta})}{\pi(\mathbf{y})} \propto \pi(\mathbf{y} \mid \mathbf{x}, \boldsymbol{\theta}) \pi(\mathbf{x}, \boldsymbol{\theta})\]</span></p>
+<p>Also, <span class="math inline">\(\pi(\mathbf{y} \mid \mathbf{x}, \boldsymbol{\theta})\)</span> represents the likelihood. Given that it is assumed that observations <span class="math inline">\(\left(y_{1}, \ldots, y_{n}\right)\)</span> are independent given the latent effects <span class="math inline">\(\mathrm{x}\)</span> and <span class="math inline">\(\theta\)</span> , the likelihood can be re-written as:</p>
+<p><span class="math display">\[\pi(\mathbf{y} \mid \mathbf{x}, \boldsymbol{\theta})=\prod_{i \in I} \pi\left(y_{i} \mid x_{i}, \boldsymbol{\theta}\right)\]</span></p>
+<p>Here, the set of indices <span class="math inline">\(I\)</span> is a subset of all integers from 1 to <span class="math inline">\(n\)</span> and only includes the indices of the observations <span class="math inline">\(y_{i}\)</span> that have been actually observed. This is, if a value in the response is missing, then its corresponding index will not be included in <span class="math inline">\(I\)</span> . For the observations with missing values, their predictive distribution can be easily computed by INLA (as described in Chapter 12).</p>
+<p>The joint distribution of the random effects and the hyperparameters, <span class="math inline">\(\pi(\mathbf{x}, \theta)\)</span> , can be rearranged as <span class="math inline">\(\pi(\mathbf{x} \mid \boldsymbol{\theta}) \pi(\boldsymbol{\theta})\)</span> , with <span class="math inline">\(\pi(\boldsymbol{\theta})\)</span> the prior distribution of the ensemble of hyperparameters <span class="math inline">\(\boldsymbol{\theta}\)</span> . As many of the hyperparameters will be independent a priori, <span class="math inline">\(\theta\)</span> is likely to be the product of several (univariate) priors. Hence, because <span class="math inline">\(\mathbf{x}\)</span> is a GMRF, the posterior distribution of the latent effects is:</p>
+<p><span class="math display">\[\pi(\mathbf{x} \mid \boldsymbol{\theta}) \propto|\mathbf{Q}(\boldsymbol{\theta})|^{1 / 2} \exp \left\{-\frac{1}{2} \mathbf{x}^{T} \mathbf{Q}(\boldsymbol{\theta}) \mathbf{x}\right\}\]</span></p>
+<p>Taking all these considerations, the joint posterior distribution of the latent effects and hyperparameters can be written down as:</p>
+<p><span class="math display">\[\begin{array}{c}
+\pi(\mathbf{x}, \boldsymbol{\theta} \mid \mathbf{y}) \propto \pi(\boldsymbol{\theta})|\mathbf{Q}(\boldsymbol{\theta})|^{1 / 2} \exp \left\{-\frac{1}{2} \mathbf{x}^{T} \mathbf{Q}(\boldsymbol{\theta}) \mathbf{x}\right\} \prod_{i \in I} \pi\left(y_{i} \mid x_{i}, \boldsymbol{\theta}\right)= \\
+\pi(\boldsymbol{\theta})|\mathbf{Q}(\boldsymbol{\theta})|^{1 / 2} \exp \left\{-\frac{1}{2} \mathbf{x}^{T} \mathbf{Q}(\boldsymbol{\theta}) \mathbf{x}+\sum_{i \in I} \log \left(\pi\left(y_{i} \mid x_{i}, \boldsymbol{\theta}\right)\right)\right\}
+\end{array}\]</span></p>
+</div>
+<div id="inla-estimation" class="section level2">
+<h2>INLA estimation</h2>
+<p>As mentioned earlier, INLA will not attempt to estimate the previous posterior distribution but the marginals of the latent effects and hyperparameters. For a latent parameter <span class="math inline">\(x_{l}\)</span> , this is</p>
+<p><span class="math display">\[\pi\left(x_{l} \mid \mathbf{y}\right)=\int \pi\left(x_{l} \mid \boldsymbol{\theta}, \mathbf{y}\right) \pi(\boldsymbol{\theta} \mid \mathbf{y}) d \boldsymbol{\theta}\]</span></p>
+<p>In a similar way, the posterior marginal for a hyperparameter <span class="math inline">\(\theta_{k}\)</span> is</p>
+<p><span class="math display">\[\pi\left(\theta_{k} \mid \mathbf{y}\right)=\int \pi(\boldsymbol{\theta} \mid \mathbf{y}) d \boldsymbol{\theta}_{-k}\]</span> ## the number of deaths by sudden infant death syndrome (SIDS) in North Carolina in two time periods (1974-1978 and 1979-1984)</p>
+<p>These data can be modeled using a Poisson regression to explain the number of cases of SIDS in the available covariates. The period 1974-1978 will be considered, and the model to be fit is</p>
+<p><span class="math display">\[\begin{array}{c}
+O_{i} \sim \operatorname{Po}\left(\mu_{i}\right), i=1, \ldots, 100 \\
+\log \left(\mu_{i}\right)=\log \left(E_{i}\right)+\beta_{0}+\beta_{1} n w_{i}, i=1, \ldots, 100
+\end{array}\]</span></p>
+<p>Here, <span class="math inline">\(O_{i}\)</span> is the number of cases of SIDS in a time period 1974-1978 in county <span class="math inline">\(i, E_{i}\)</span> the expected number of cases and <span class="math inline">\(n w_{i}\)</span> the proportion of non-white births in the same period.</p>
+<p>The expected number of cases is included as an offset in the model to account for the uneven distribution of the population across the counties in North Carolina. In this case, it is computed by multiplying the overall mortality rate of SIDS by the number of births in each county <span class="math inline">\(P_{i}\)</span> (which is the population at risk), i.e.,</p>
+<p><span class="math display">\[E_{i}=P_{i} \frac{\sum_{i=1}^{100} O_{i}}{\sum_{i=1}^{100} P_{i}}\]</span></p>
+<pre class="r"><code>dev.new()
+
+## ----sett02, echo = FALSE, results = &#39;hide&#39;, message = FALSE, warning = FALSE----
+library(&quot;knitr&quot;)
+opts_chunk$set(
+  fig.path = &#39;figs/02-INLA-&#39;,
+  message = FALSE, warning = FALSE
+)
+options(width = 75, prompt = &quot; &quot;, continue = &quot;   &quot;, digits = 4)
+library(&quot;INLA&quot;)</code></pre>
+<pre><code>## Loading required package: Matrix</code></pre>
+<pre><code>## Loading required package: foreach</code></pre>
+<pre><code>## Loading required package: parallel</code></pre>
+<pre><code>## Loading required package: sp</code></pre>
+<pre><code>## This is INLA_22.05.07 built 2022-05-07 09:52:03 UTC.
+##  - See www.r-inla.org/contact-us for how to get help.</code></pre>
+<pre class="r"><code>## ----eval = FALSE-------------------------------------------------------------
+## # Set INLA repository
+## options(repos = c(getOption(&quot;repos&quot;),
+##    INLA=&quot;https://inla.r-inla-download.org/R/stable&quot;))
+## 
+## # Install INLA and dependencies (from CRAN)
+## install.packages(&quot;INLA&quot;, dep = TRUE)
+
+
+
+## -----------------------------------------------------------------------------
+library(&quot;INLA&quot;)
+
+
+## ----eval = FALSE-------------------------------------------------------------
+## names(inla.models()$likelihood)
+
+
+## ----message = FALSE----------------------------------------------------------
+library(&quot;spdep&quot;)</code></pre>
+<pre><code>## Loading required package: spData</code></pre>
+<pre><code>## To access larger datasets in this package, install the spDataLarge
+## package with: `install.packages(&#39;spDataLarge&#39;,
+## repos=&#39;https://nowosad.github.io/drat/&#39;, type=&#39;source&#39;)`</code></pre>
+<pre><code>## Loading required package: sf</code></pre>
+<pre><code>## Linking to GEOS 3.9.1, GDAL 3.3.2, PROJ 7.2.1; sf_use_s2() is TRUE</code></pre>
+<pre class="r"><code>data(nc.sids)
+
+# Overall rate
+r &lt;- sum(nc.sids$SID74) / sum(nc.sids$BIR74)
+
+# Expected SIDS per county
+nc.sids$EXP74 &lt;- r * nc.sids$BIR74
+
+
+## -----------------------------------------------------------------------------
+# Proportion of non-white births
+nc.sids$NWPROP74 &lt;- nc.sids$NWBIR74 / nc.sids$BIR74
+
+
+## -----------------------------------------------------------------------------
+m.pois &lt;- inla(SID74 ~ NWPROP74, data = nc.sids, family = &quot;poisson&quot;,
+               E = EXP74)
+summary(m.pois)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 1.07, Running = 0.306, Post = 0.0546, Total = 1.43 
+## Fixed effects:
+##               mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## (Intercept) -0.646 0.090     -0.824   -0.645     -0.471   NA   0
+## NWPROP74     1.868 0.217      1.441    1.869      2.293   NA   0
+## 
+## Marginal log-Likelihood:  -226.13 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+m.poisover &lt;- inla(SID74 ~ NWPROP74 + f(CNTY.ID, model = &quot;iid&quot;),
+                   data = nc.sids, family = &quot;poisson&quot;, E = EXP74)
+
+
+## ----eval = FALSE-------------------------------------------------------------
+## # Add index for latent effect
+## nc.sids$idx &lt;- 1:nrow(nc.sids)
+## # Model fitting
+## m.poisover &lt;- inla(SID74 ~ NWPROP74 + f(idx, model = &quot;iid&quot;),
+##   data = nc.sids, family = &quot;poisson&quot;, E = EXP74)
+
+
+## -----------------------------------------------------------------------------
+summary(m.poisover)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.779, Running = 0.374, Post = 0.0698, Total = 1.22 
+## Fixed effects:
+##               mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## (Intercept) -0.646 0.092     -0.829   -0.645     -0.466   NA   0
+## NWPROP74     1.871 0.224      1.432    1.871      2.309   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     CNTY.ID IID model
+## 
+## Model hyperparameters:
+##                           mean       sd 0.025quant 0.5quant 0.975quant
+## Precision for CNTY.ID 15739.46 19112.65      14.02  9398.68   69123.25
+##                       mode
+## Precision for CNTY.ID   NA
+## 
+## Marginal log-Likelihood:  -227.84 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+# Poisson model
+m.pois &lt;- inla(SID74 ~ NWPROP74, data = nc.sids, family = &quot;poisson&quot;,
+               E = EXP74, control.compute = list(cpo = TRUE, dic = TRUE, waic = TRUE))
+
+# Poisson model with iid random effects
+m.poisover &lt;- inla(SID74 ~ NWPROP74 + f(CNTY.ID, model = &quot;iid&quot;),
+                   data = nc.sids, family = &quot;poisson&quot;, E = EXP74,
+                   control.compute = list(cpo = TRUE, dic = TRUE, waic = TRUE))
+
+
+## ----label = &quot;nc-sids-IC&quot;, echo = FALSE---------------------------------------
+d &lt;- data.frame(Model = c(&quot;Poisson&quot;, &quot;Poisson + r. eff.&quot;),
+                DIC = c(m.pois$dic$dic, m.poisover$dic$dic),
+                WAIC = c(m.pois$waic$waic, m.poisover$waic$waic),
+                CPO = c(-sum(log(m.pois$cpo$cpo)), -sum(log(m.poisover$cpo$cpo))),
+                MLIK = c(m.pois$mlik[1, 1], m.poisover$mlik[1, 1])
+)
+
+knitr::kable(d, booktabs = TRUE,
+             caption = &quot;Summary of values of DIC, WAIC, CPO and marginal likelihood for different models
+fit to the North Carolina SIDS data.&quot;)</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-1">Table 1: </span>Summary of values of DIC, WAIC, CPO and marginal likelihood for different models
+fit to the North Carolina SIDS data.</caption>
+<thead>
+<tr class="header">
+<th align="left">Model</th>
+<th align="right">DIC</th>
+<th align="right">WAIC</th>
+<th align="right">CPO</th>
+<th align="right">MLIK</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Poisson</td>
+<td align="right">441.6</td>
+<td align="right">442.7</td>
+<td align="right">221.4</td>
+<td align="right">-226.1</td>
+</tr>
+<tr class="even">
+<td align="left">Poisson + r. eff.</td>
+<td align="right">439.1</td>
+<td align="right">439.8</td>
+<td align="right">221.3</td>
+<td align="right">-226.9</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># ggplot version
+library(&quot;ggplot2&quot;)
+library(&quot;gridExtra&quot;)
+
+
+## -----------------------------------------------------------------------------
+m.strategy &lt;- lapply(c(&quot;gaussian&quot;, &quot;simplified.laplace&quot;, &quot;laplace&quot;), 
+                     function(st) {
+                       return(lapply(c(&quot;ccd&quot;, &quot;grid&quot;, &quot;eb&quot;), function(int.st) {
+                         inla(SID74 ~ NWPROP74 + f(CNTY.ID, model = &quot;iid&quot;),
+                              data = nc.sids, family = &quot;poisson&quot;, E = EXP74,
+                              control.inla = list(strategy = st, int.strategy = int.st),
+                              control.compute = list(cpo = TRUE, dic = TRUE, waic = TRUE))
+                       }))
+                     })
+
+
+## ----echo = FALSE, fig = TRUE, label = &quot;stintercept&quot;, fig.cap = &#39;(ref:stintercept)&#39;, fig.height = 3.45, fitg.height = 6----
+# Colors using the viridis palette
+library(&quot;viridis&quot;)</code></pre>
+<pre><code>## Loading required package: viridisLite</code></pre>
+<pre class="r"><code>intst.colors &lt;- magma(4) #4 to remove yellow
+
+# ggplot version
+
+marg.beta &lt;- lapply(m.strategy, function(X) {
+  do.call(rbind, lapply(X, function(Y) {Y$marginals.fixed[[1]]}))
+})
+marg.beta &lt;- as.data.frame(do.call(rbind, marg.beta))
+marg.beta$strategy &lt;- rep(c(&quot;gaussian&quot;, &quot;simplified.laplace&quot;, &quot;laplace&quot;),
+                          each = 129)
+marg.beta$strategy &lt;- factor(marg.beta$strategy,
+                             levels = c(&quot;gaussian&quot;, &quot;simplified.laplace&quot;, &quot;laplace&quot;))
+marg.beta$int.strategy &lt;- rep(rep( c(&quot;ccd&quot;, &quot;grid&quot;, &quot;eb&quot;), each = 129))
+marg.beta$int.strategy &lt;- factor(marg.beta$int.strategy,
+                                 levels = c(&quot;ccd&quot;, &quot;grid&quot;, &quot;eb&quot;))
+
+
+ggplot(marg.beta, aes(x = x, y = y, linetype = strategy, 
+                      colour = int.strategy)) +
+  geom_line() +
+  xlim(-1.2, -0.2) + ylim(0, 5) +
+  xlab(expression(beta[0])) +
+  ylab(expression(paste(pi, &quot;(&quot;, beta[0], &quot; | &quot;, bold(y), &quot;)&quot;)) ) +
+  scale_linetype_manual(values = c(&quot;solid&quot;, &quot;dashed&quot;, &quot;dotted&quot;)) +
+  scale_colour_manual(values = intst.colors) +
+  theme(legend.position = c(0.15, 0.65),
+        legend.background = element_rect(fill = &quot;transparent&quot;),
+        legend.title = element_blank())</code></pre>
+<pre><code>## Warning: Removed 2 row(s) containing missing values (geom_path).</code></pre>
+<pre class="r"><code>## ----echo = FALSE, fig = TRUE, label = &quot;stfixed&quot;, fig.cap = &#39;(ref:stfixed)&#39;, fig.height = 3.45, fitg.height = 6----
+# ggplot version
+
+marg.beta &lt;- lapply(m.strategy, function(X) {
+  do.call(rbind, lapply(X, function(Y) {Y$marginals.fixed[[2]]}))
+})
+marg.beta &lt;- as.data.frame(do.call(rbind, marg.beta))
+marg.beta$strategy &lt;- rep(c(&quot;gaussian&quot;, &quot;simplified.laplace&quot;, &quot;laplace&quot;),
+                          each = 129)
+marg.beta$strategy &lt;- factor(marg.beta$strategy,
+                             levels = c(&quot;gaussian&quot;, &quot;simplified.laplace&quot;, &quot;laplace&quot;))
+marg.beta$int.strategy &lt;- rep(rep( c(&quot;ccd&quot;, &quot;grid&quot;, &quot;eb&quot;), each = 129))
+marg.beta$int.strategy &lt;- factor(marg.beta$int.strategy,
+                                 levels = c(&quot;ccd&quot;, &quot;grid&quot;, &quot;eb&quot;))
+
+ggplot(marg.beta, aes(x = x, y = y, linetype = strategy, 
+                      colour = int.strategy)) +
+  geom_line() +
+  xlim(0.75, 3) + ylim(0, 2) +
+  xlab(expression(beta[1])) +
+  ylab(expression(paste(pi, &quot;(&quot;, beta[1], &quot; | &quot;, bold(y), &quot;)&quot;)) ) +
+  scale_linetype_manual(values = c(&quot;solid&quot;, &quot;dashed&quot;, &quot;dotted&quot;)) +
+  scale_colour_manual(values = intst.colors) +
+  theme(legend.position = c(0.15, 0.65), 
+        legend.background = element_rect(fill = &quot;transparent&quot;), 
+        legend.title = element_blank())</code></pre>
+<pre><code>## Warning: Removed 3 row(s) containing missing values (geom_path).</code></pre>
+<pre class="r"><code>## ----echo = FALSE, fig = TRUE, label = &quot;stprec&quot;, fig.cap = &#39;(ref:stprec)&#39;, fig.height = 3.45, fitg.height = 6----
+
+marg.prec &lt;- lapply(m.strategy, function(X) {
+  do.call(rbind, lapply(X, function(Y) {Y$marginals.hyperpar[[1]]}))
+})
+marg.prec &lt;- as.data.frame(do.call(rbind, marg.prec))
+marg.prec$strategy &lt;- rep(c(&quot;gaussian&quot;, &quot;simplified.laplace&quot;, &quot;laplace&quot;),
+                          each = 129)
+marg.prec$strategy &lt;- factor(marg.prec$strategy,
+                             levels = c(&quot;gaussian&quot;, &quot;simplified.laplace&quot;, &quot;laplace&quot;))
+marg.prec$int.strategy &lt;- rep(rep( c(&quot;ccd&quot;, &quot;grid&quot;, &quot;eb&quot;), each = 129))
+marg.prec$int.strategy &lt;- factor(marg.prec$int.strategy,
+                                 levels = c(&quot;ccd&quot;, &quot;grid&quot;, &quot;eb&quot;))
+
+
+ggplot(marg.prec, aes(x = x, y = y, linetype = strategy,
+                      colour = int.strategy)) +
+  geom_line() +
+  xlim(0, 200) + ylim(0, 0.035) +
+  xlab(expression(tau[u])) +
+  ylab(expression(paste(pi, &quot;(&quot;, tau[u], &quot; | &quot;, bold(y), &quot;)&quot;)) ) +
+  scale_linetype_manual(values = c(&quot;solid&quot;, &quot;dashed&quot;, &quot;dotted&quot;)) +
+  scale_colour_manual(values = intst.colors) +
+  theme(legend.position = c(0.8, 0.65),
+        legend.background = element_rect(fill = &quot;transparent&quot;),
+        legend.title = element_blank())</code></pre>
+<pre><code>## Warning: Removed 123 row(s) containing missing values (geom_path).</code></pre>
+<div id="spatial-space" class="section level3">
+<h3>spatial Space</h3>
+<pre class="r"><code>## ----sett03, echo = FALSE, results = &#39;hide&#39;, message = FALSE, warning = FALSE----
+library(&quot;knitr&quot;)
+opts_chunk$set(
+  fig.path = &#39;figs/03-GLMM-&#39;,
+  message = FALSE, warning = FALSE
+)
+options(width = 75, prompt = &quot; &quot;, continue = &quot;   &quot;, digits = 4)
+library(&quot;INLA&quot;)
+
+
+## ----message = FALSE----------------------------------------------------------
+library(&quot;spdep&quot;)
+data(nc.sids)
+
+# Overall rate
+r &lt;- sum(nc.sids$SID74) / sum(nc.sids$BIR74)
+nc.sids$EXP74 &lt;- r * nc.sids$BIR74
+
+# Proportion of non-white births
+nc.sids$NWPROP74 &lt;- nc.sids$NWBIR74 / nc.sids$BIR74
+
+
+## ----message = FALSE----------------------------------------------------------
+m.pois.lin1 &lt;- inla(SID74 ~ f(NWPROP74, model = &quot;linear&quot;),
+  data = nc.sids, family = &quot;poisson&quot;, E = EXP74)
+
+summary(m.pois.lin1)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.654, Running = 0.263, Post = 0.0423, Total = 0.959 
+## Fixed effects:
+##               mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## (Intercept) -0.646 0.090     -0.824   -0.645     -0.471   NA   0
+## NWPROP74     1.868 0.217      1.441    1.869      2.293   NA   0
+## 
+## Marginal log-Likelihood:  -226.13 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## ----message = FALSE----------------------------------------------------------
+library(&quot;INLA&quot;)
+m.pois.clin1 &lt;- inla(SID74 ~ f(NWPROP74, model = &quot;clinear&quot;,
+  range = c(0, Inf)), data = nc.sids, family = &quot;poisson&quot;,
+  E = EXP74)
+
+summary(m.pois.clin1)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.778, Running = 0.356, Post = 0.0647, Total = 1.2 
+## Fixed effects:
+##               mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## (Intercept) -0.672 0.083     -0.841    -0.67     -0.516   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     NWPROP74 Constrained linear
+## 
+## Model hyperparameters:
+##                   mean    sd 0.025quant 0.5quant 0.975quant mode
+## Beta for NWPROP74 1.93 0.202       1.54     1.93       2.31   NA
+## 
+## Marginal log-Likelihood:  -222.89 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+nc.sids$ID &lt;- 1:100
+
+
+## -----------------------------------------------------------------------------
+m.pois.iid &lt;- inla(SID74 ~ f(ID, model = &quot;iid&quot;),
+  data = nc.sids, family = &quot;poisson&quot;,
+  E = EXP74)
+
+summary(m.pois.iid)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.746, Running = 0.335, Post = 0.0608, Total = 1.14 
+## Fixed effects:
+##               mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## (Intercept) -0.028 0.063     -0.155   -0.026      0.092   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     ID IID model
+## 
+## Model hyperparameters:
+##                  mean   sd 0.025quant 0.5quant 0.975quant mode
+## Precision for ID 7.25 2.56       3.80     6.77      13.48   NA
+## 
+## Marginal log-Likelihood:  -245.56 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+m.pois.iid2 &lt;- inla(SID74 ~ NWPROP74 + f(ID, model = &quot;iid&quot;),
+  data = nc.sids, family = &quot;poisson&quot;,
+  E = EXP74)
+
+summary(m.pois.iid2)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.773, Running = 0.382, Post = 0.0627, Total = 1.22 
+## Fixed effects:
+##               mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## (Intercept) -0.646 0.093     -0.829   -0.645     -0.466   NA   0
+## NWPROP74     1.871 0.224      1.432    1.871      2.310   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     ID IID model
+## 
+## Model hyperparameters:
+##                      mean       sd 0.025quant 0.5quant 0.975quant mode
+## Precision for ID 15703.49 19103.26      14.04  9352.54   69076.08   NA
+## 
+## Marginal log-Likelihood:  -227.84 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+m.pois.z &lt;- inla(SID74 ~ f(ID, model = &quot;z&quot;, Z = Diagonal(nrow(nc.sids), 1)),
+  data = nc.sids, family = &quot;poisson&quot;, E = EXP74)
+
+summary(m.pois.z)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.869, Running = 0.404, Post = 0.06, Total = 1.33 
+## Fixed effects:
+##               mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## (Intercept) -0.028 0.063     -0.154   -0.026      0.092   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     ID Z model
+## 
+## Model hyperparameters:
+##                  mean   sd 0.025quant 0.5quant 0.975quant mode
+## Precision for ID 7.25 2.55       3.80     6.78      13.45   NA
+## 
+## Marginal log-Likelihood:  -245.56 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+m.pois.g0 &lt;- inla(SID74 ~ f(ID, model = &quot;generic0&quot;, 
+  Cmatrix = Diagonal(nrow(nc.sids), 1)),
+  data = nc.sids, family = &quot;poisson&quot;, E = EXP74)
+
+summary(m.pois.g0)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.687, Running = 0.321, Post = 0.0622, Total = 1.07 
+## Fixed effects:
+##               mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## (Intercept) -0.028 0.063     -0.155   -0.026      0.092   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     ID Generic0 model
+## 
+## Model hyperparameters:
+##                  mean   sd 0.025quant 0.5quant 0.975quant mode
+## Precision for ID 7.25 2.56       3.80     6.77      13.48   NA
+## 
+## Marginal log-Likelihood:  -245.56 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+K1 &lt;- Diagonal(nrow(nc.sids), 1)
+
+m.pois.g2 &lt;- inla(SID74 ~ f(ID, model = &quot;generic3&quot;, Cmatrix = list(K1)),
+  data = nc.sids, family = &quot;poisson&quot;, E = EXP74)
+
+summary(m.pois.g2)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.841, Running = 0.393, Post = 0.0625, Total = 1.3 
+## Fixed effects:
+##               mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## (Intercept) -0.028 0.063     -0.155   -0.026      0.092   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     ID Generic3 model
+## 
+## Model hyperparameters:
+##                                   mean   sd 0.025quant 0.5quant 0.975quant
+## Precision for Cmatrix[[1]] for ID 7.26 2.55       3.80     6.78      13.43
+##                                   mode
+## Precision for Cmatrix[[1]] for ID   NA
+## 
+## Marginal log-Likelihood:  -245.56 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+#Overall rate
+r79 &lt;- sum(nc.sids$SID79) / sum(nc.sids$BIR79)
+nc.sids$EXP79 &lt;- r79 * nc.sids$BIR79
+
+
+## -----------------------------------------------------------------------------
+#New data.frame
+nc.new &lt;- data.frame(SID = c(nc.sids$SID74, nc.sids$SID79),
+  EXP = c(nc.sids$EXP74, nc.sids$EXP79),
+  PERIOD = as.factor(c(rep(&quot;74&quot;, 100), rep(&quot;79&quot;, 100))),
+  ID = 1:200)
+
+
+## -----------------------------------------------------------------------------
+m.pois.iid2d &lt;- inla(SID ~ 0 + PERIOD + f(ID, model = &quot;iid2d&quot;, n = 2 * 100),
+  data = nc.new, family = &quot;poisson&quot;, E = EXP)
+
+summary(m.pois.iid2d)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.777, Running = 0.536, Post = 0.0849, Total = 1.4 
+## Fixed effects:
+##            mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## PERIOD74 -0.040 0.066     -0.174   -0.039      0.087   NA   0
+## PERIOD79 -0.007 0.055     -0.117   -0.007      0.098   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     ID IID2D model
+## 
+## Model hyperparameters:
+##                                 mean    sd 0.025quant 0.5quant 0.975quant
+## Precision for ID (component 1) 5.559 1.426      3.266    5.388      8.846
+## Precision for ID (component 2) 9.069 2.379      5.258    8.780     14.561
+## Rho1:2 for ID                  0.396 0.156      0.062    0.407      0.669
+##                                mode
+## Precision for ID (component 1)   NA
+## Precision for ID (component 2)   NA
+## Rho1:2 for ID                    NA
+## 
+## Marginal log-Likelihood:  -489.96 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## ----label = &quot;sids-iid2d&quot;, fig = TRUE, echo = FALSE, fig.cap = &#39;(ref:sids-iid2d)&#39;, fig.height = 3.45, fig.width = 6----
+#ggplot version
+library(&quot;ggplot2&quot;)
+tab &lt;- data.frame(u = m.pois.iid2d$summary.random$ID$mean[1:100],
+  v = m.pois.iid2d$summary.random$ID$mean[100 + 1:100])
+
+ggplot(tab, aes (x = u, y = v)) + geom_point() +
+  xlab(expression(u[i])) +
+  ylab(expression(v[i])) +
+  geom_abline(intercept = 0, slope = 1)</code></pre>
+<p><img src="figs/02-INLA-unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+data(AirPassengers)
+
+airp.data &lt;- data.frame(airp = as.vector(AirPassengers),
+  month = as.factor(rep(1:12, 12)), 
+  year = as.factor(rep(1949:1960, each = 12)),
+  ID = 1:length(AirPassengers))
+
+
+## ----label = &quot;airp&quot;, fig = TRUE, echo = FALSE, fig.cap = &quot;Monthly international airline passengers: original data (top) and log-scale (bottom).&quot;, fig.width = 5, fig.height = 3.5, fig.align = &quot;center&quot;----
+# ggplot version
+library(&quot;ggfortify&quot;)
+library(&quot;gridExtra&quot;)
+
+
+p1 &lt;- autoplot(AirPassengers) + 
+  ggtitle(&quot;Number of international passengers&quot;) +
+  xlab(&quot;Time&quot;) +
+  ylab(&quot;AirPassengers&quot;)
+
+p2 &lt;- autoplot(log(AirPassengers)) + 
+  ggtitle(&quot;Number of international passengers (log-scale)&quot;) +
+  xlab(&quot;Time&quot;) +
+  ylab(&quot;log(AirPassengers)&quot;)
+
+grid.arrange(p1, p2, nrow = 2)</code></pre>
+<p><img src="figs/02-INLA-unnamed-chunk-2-2.png" width="672" /></p>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+airp.rw1 &lt;- inla(log(AirPassengers) ~ 0 + year + f(ID, model = &quot;rw1&quot;),
+  control.family = list(hyper = list(prec = list(param = c(1, 0.2)))),
+  data = airp.data, control.predictor = list(compute = TRUE))
+
+summary(airp.rw1)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.862, Running = 0.469, Post = 0.123, Total = 1.45 
+## Fixed effects:
+##           mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## year1949 5.157 0.252      4.664    5.156      5.655   NA   0
+## year1950 5.207 0.220      4.777    5.207      5.641   NA   0
+## year1951 5.332 0.190      4.959    5.332      5.707   NA   0
+## year1952 5.420 0.165      5.097    5.420      5.745   NA   0
+## year1953 5.490 0.146      5.203    5.490      5.776   NA   0
+## year1954 5.517 0.135      5.251    5.517      5.782   NA   0
+## year1955 5.602 0.135      5.335    5.602      5.867   NA   0
+## year1956 5.670 0.146      5.382    5.670      5.955   NA   0
+## year1957 5.727 0.165      5.401    5.727      6.050   NA   0
+## year1958 5.736 0.190      5.361    5.736      6.109   NA   0
+## year1959 5.806 0.219      5.374    5.807      6.237   NA   0
+## year1960 5.843 0.251      5.349    5.843      6.336   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     ID RW1 model
+## 
+## Model hyperparameters:
+##                                           mean    sd 0.025quant 0.5quant
+## Precision for the Gaussian observations 100.79 18.27      68.77    99.49
+## Precision for ID                        157.57 42.39      93.82   150.95
+##                                         0.975quant mode
+## Precision for the Gaussian observations     140.51   NA
+## Precision for ID                            259.19   NA
+## 
+## Marginal log-Likelihood:  2.06 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+airp.rw2 &lt;- inla(log(AirPassengers) ~ 0 + year + f(ID, model = &quot;rw2&quot;),
+  control.family = list(hyper = list(prec = list(param = c(1, 0.2)))),
+  data = airp.data, control.predictor = list(compute = TRUE))
+summary(airp.rw2)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.855, Running = 0.496, Post = 0.125, Total = 1.48 
+## Fixed effects:
+##           mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## year1949 5.148 0.277      4.603    5.148      5.693   NA   0
+## year1950 5.202 0.242      4.726    5.202      5.678   NA   0
+## year1951 5.323 0.210      4.910    5.323      5.735   NA   0
+## year1952 5.416 0.182      5.058    5.417      5.775   NA   0
+## year1953 5.467 0.162      5.149    5.467      5.784   NA   0
+## year1954 5.501 0.150      5.207    5.501      5.794   NA   0
+## year1955 5.585 0.149      5.292    5.585      5.879   NA   0
+## year1956 5.653 0.161      5.337    5.653      5.969   NA   0
+## year1957 5.716 0.182      5.358    5.716      6.073   NA   0
+## year1958 5.755 0.210      5.342    5.755      6.168   NA   0
+## year1959 5.848 0.243      5.371    5.848      6.325   NA   0
+## year1960 5.894 0.279      5.346    5.894      6.442   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     ID RW2 model
+## 
+## Model hyperparameters:
+##                                           mean     sd 0.025quant 0.5quant
+## Precision for the Gaussian observations 101.53  16.74      72.01   100.39
+## Precision for ID                        410.34 138.37     209.10   386.91
+##                                         0.975quant mode
+## Precision for the Gaussian observations     137.78   NA
+## Precision for ID                            747.14   NA
+## 
+## Marginal log-Likelihood:  -12.68 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## ----label = &quot;airp-rw&quot;, fig = TRUE, echo = FALSE, fig.cap = &quot;Fitted values (i.e., posterior means) of the number of international passengers.&quot;, fig.height = 3.75, fig.width = 6----
+# ggplot version
+
+tab &lt;- data.frame(x = rep(as.vector(time(AirPassengers)), 3),
+  y = c(log(AirPassengers), airp.rw1$summary.fitted.values$mean,
+    airp.rw2$summary.fitted.values$mean),
+  lab = rep(c(&quot;data&quot;, &quot;RW1&quot;, &quot;RW2&quot;), each = length(AirPassengers))
+)
+
+ggplot(tab, aes(x = x, y = y, linetype = lab)) + geom_line() +
+  theme(legend.position = c(0.1, 0.8), legend.title = element_blank()) +
+  xlab(&quot;Time&quot;) +
+  ylab(&quot;log(AirPassengers)&quot;) +
+  ggtitle(&quot;Number of international passengers (log-scale)&quot;)</code></pre>
+<p><img src="figs/02-INLA-unnamed-chunk-2-3.png" width="672" /></p>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+airp.seasonal &lt;- inla(log(AirPassengers) ~ 0 + year +
+    f(ID, model = &quot;seasonal&quot;, season.length = 12),
+  control.family = list(hyper = list(prec = list(param = c(1, 0.2)))),
+  data = airp.data)
+summary(airp.seasonal)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.797, Running = 0.4, Post = 0.122, Total = 1.32 
+## Fixed effects:
+##           mean   sd 0.025quant 0.5quant 0.975quant mode kld
+## year1949 4.836 0.02      4.797    4.836      4.875   NA   0
+## year1950 4.931 0.02      4.892    4.931      4.970   NA   0
+## year1951 5.131 0.02      5.092    5.131      5.171   NA   0
+## year1952 5.277 0.02      5.238    5.277      5.317   NA   0
+## year1953 5.409 0.02      5.369    5.409      5.448   NA   0
+## year1954 5.467 0.02      5.427    5.467      5.506   NA   0
+## year1955 5.639 0.02      5.600    5.639      5.679   NA   0
+## year1956 5.784 0.02      5.745    5.784      5.824   NA   0
+## year1957 5.898 0.02      5.859    5.898      5.938   NA   0
+## year1958 5.931 0.02      5.891    5.931      5.970   NA   0
+## year1959 6.048 0.02      6.009    6.048      6.088   NA   0
+## year1960 6.154 0.02      6.115    6.154      6.193   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     ID Seasonal model
+## 
+## Model hyperparameters:
+##                                             mean       sd 0.025quant
+## Precision for the Gaussian observations   212.45    27.39     162.78
+## Precision for ID                        40273.08 24661.23   10324.35
+##                                         0.5quant 0.975quant mode
+## Precision for the Gaussian observations   211.03     270.51   NA
+## Precision for ID                        34596.61  103809.51   NA
+## 
+## Marginal log-Likelihood:  70.24 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+airp.ar1 &lt;- inla(log(AirPassengers) ~ 0 + year + f(ID, model = &quot;ar1&quot;),
+  control.family = list(hyper = list(prec = list(param = c(1, 0.2)))),
+  data = airp.data, control.predictor = list(compute = TRUE))
+summary(airp.ar1)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.854, Running = 0.364, Post = 0.133, Total = 1.35 
+## Fixed effects:
+##           mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## year1949 4.843 0.084      4.679    4.842      5.016   NA   0
+## year1950 4.940 0.081      4.782    4.939      5.104   NA   0
+## year1951 5.129 0.080      4.969    5.129      5.289   NA   0
+## year1952 5.277 0.080      5.117    5.277      5.437   NA   0
+## year1953 5.403 0.080      5.242    5.403      5.562   NA   0
+## year1954 5.478 0.080      5.320    5.477      5.640   NA   0
+## year1955 5.638 0.080      5.478    5.638      5.797   NA   0
+## year1956 5.776 0.080      5.614    5.777      5.934   NA   0
+## year1957 5.888 0.081      5.724    5.889      6.045   NA   0
+## year1958 5.932 0.080      5.771    5.933      6.091   NA   0
+## year1959 6.046 0.081      5.882    6.047      6.205   NA   0
+## year1960 6.124 0.085      5.948    6.127      6.287   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     ID AR1 model
+## 
+## Model hyperparameters:
+##                                            mean     sd 0.025quant 0.5quant
+## Precision for the Gaussian observations 102.081 17.952     70.633  100.793
+## Precision for ID                         63.833 21.536     29.424   61.314
+## Rho for ID                                0.753  0.074      0.593    0.759
+##                                         0.975quant mode
+## Precision for the Gaussian observations    141.140   NA
+## Precision for ID                           113.066   NA
+## Rho for ID                                   0.879   NA
+## 
+## Marginal log-Likelihood:  4.71 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+airp.ar3 &lt;- inla(log(AirPassengers) ~ 0 + year + f(ID, model = &quot;ar&quot;,
+    order = 3), 
+  control.family = list(hyper = list(prec = list(param = c(1, 0.2)))),
+  data = airp.data, control.predictor = list(compute = TRUE))
+summary(airp.ar3)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.954, Running = 0.406, Post = 0.164, Total = 1.53 
+## Fixed effects:
+##           mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## year1949 4.835 0.028      4.780    4.835      4.890   NA   0
+## year1950 4.930 0.028      4.875    4.930      4.985   NA   0
+## year1951 5.131 0.028      5.076    5.131      5.186   NA   0
+## year1952 5.277 0.028      5.222    5.277      5.332   NA   0
+## year1953 5.408 0.028      5.353    5.408      5.463   NA   0
+## year1954 5.465 0.028      5.410    5.465      5.520   NA   0
+## year1955 5.639 0.028      5.584    5.639      5.694   NA   0
+## year1956 5.784 0.028      5.729    5.784      5.839   NA   0
+## year1957 5.898 0.028      5.843    5.898      5.953   NA   0
+## year1958 5.930 0.028      5.875    5.930      5.985   NA   0
+## year1959 6.048 0.028      5.993    6.048      6.103   NA   0
+## year1960 6.154 0.028      6.099    6.154      6.209   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     ID AR(p) model
+## 
+## Model hyperparameters:
+##                                            mean     sd 0.025quant 0.5quant
+## Precision for the Gaussian observations 110.488  5.174    100.699  110.287
+## Precision for ID                        218.023 27.782    168.766  216.623
+## PACF1 for ID                              0.856  0.003      0.849    0.857
+## PACF2 for ID                             -0.851  0.038     -0.923   -0.861
+## PACF3 for ID                             -0.930  0.022     -0.967   -0.930
+##                                         0.975quant mode
+## Precision for the Gaussian observations    121.579   NA
+## Precision for ID                           283.311   NA
+## PACF1 for ID                                 0.863   NA
+## PACF2 for ID                                -0.738   NA
+## PACF3 for ID                                -0.864   NA
+## 
+## Marginal log-Likelihood:  39.29 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+Z &lt;- model.matrix (~ 0 + year, data = airp.data)
+Q.beta &lt;- Diagonal(12, 0.001)
+
+airp.ar1c &lt;- inla(log(AirPassengers) ~ 1 + f(ID, model = &quot;ar1c&quot;,
+  args.ar1c = list(Z = Z, Q.beta = Q.beta)),
+  control.family = list(hyper = list(prec = list(param = c(1, 0.2)))),
+  data = airp.data, control.predictor = list(compute = TRUE))
+summary(airp.ar1c)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.738, Running = 0.316, Post = 0.0804, Total = 1.13 
+## Fixed effects:
+##              mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## (Intercept) 4.724 0.135      4.458    4.724       4.99   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     ID AR1C model
+## 
+## Model hyperparameters:
+##                                            mean     sd 0.025quant 0.5quant
+## Precision for the Gaussian observations  99.013 18.961     66.190   97.525
+## Precision for ID                        119.627 37.122     64.824  113.554
+## Rho for ID                                0.522  0.088      0.331    0.529
+##                                         0.975quant mode
+## Precision for the Gaussian observations    140.612   NA
+## Precision for ID                           209.398   NA
+## Rho for ID                                   0.676   NA
+## 
+## Marginal log-Likelihood:  3.68 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## ----label = &quot;airp-ar&quot;, fig = TRUE, echo = FALSE, fig.cap = &quot;Fitted values (i.e., posterior means) of the number of international passengers using autoregressive models.&quot;, fig.height = 3.65, fig.width = 6----
+# ggplot version
+
+tab &lt;- data.frame(x = rep(as.vector(time(AirPassengers)), 4),
+  y = c(log(AirPassengers), 
+    airp.ar1$summary.fitted.values$mean,
+    airp.ar3$summary.fitted.values$mean,
+    airp.ar1c$summary.fitted.values$mean),
+  lab = factor(rep(c(&quot;data&quot;, &quot;AR(1)&quot;, &quot;AR(3)&quot;, &quot;AR(1) with cov.&quot;),
+    each = length(AirPassengers)),
+    levels = c(&quot;data&quot;, &quot;AR(1)&quot;, &quot;AR(3)&quot;, &quot;AR(1) with cov.&quot;))
+)
+
+ggplot(tab, aes(x = x, y = y, linetype = lab)) + geom_line() +
+  theme(legend.position = c(0.15, 0.8), legend.title = element_blank()) +
+  xlab(&quot;Time&quot;) +
+  ylab(&quot;log(AirPassengers)&quot;) +
+  ggtitle(&quot;Number of international passengers (log-scale)&quot;)</code></pre>
+<p><img src="figs/02-INLA-unnamed-chunk-2-4.png" width="672" /></p>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+names(inla.models()$latent$iid)</code></pre>
+<pre><code>##  [1] &quot;doc&quot;                &quot;hyper&quot;              &quot;constr&quot;            
+##  [4] &quot;nrow.ncol&quot;          &quot;augmented&quot;          &quot;aug.factor&quot;        
+##  [7] &quot;aug.constr&quot;         &quot;n.div.by&quot;           &quot;n.required&quot;        
+## [10] &quot;set.default.values&quot; &quot;pdf&quot;</code></pre>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+prec.prior &lt;- inla.models()$latent$iid$hyper$theta
+prec.prior</code></pre>
+<pre><code>## $hyperid
+## [1] 1001
+## attr(,&quot;inla.read.only&quot;)
+## [1] FALSE
+## 
+## $name
+## [1] &quot;log precision&quot;
+## attr(,&quot;inla.read.only&quot;)
+## [1] FALSE
+## 
+## $short.name
+## [1] &quot;prec&quot;
+## attr(,&quot;inla.read.only&quot;)
+## [1] FALSE
+## 
+## $prior
+## [1] &quot;loggamma&quot;
+## attr(,&quot;inla.read.only&quot;)
+## [1] FALSE
+## 
+## $param
+## [1] 1e+00 5e-05
+## attr(,&quot;inla.read.only&quot;)
+## [1] FALSE
+## 
+## $initial
+## [1] 4
+## attr(,&quot;inla.read.only&quot;)
+## [1] FALSE
+## 
+## $fixed
+## [1] FALSE
+## attr(,&quot;inla.read.only&quot;)
+## [1] FALSE
+## 
+## $to.theta
+## function (x) 
+## log(x)
+## &lt;bytecode: 0x00000190b75ac300&gt;
+## &lt;environment: 0x00000190b75b2368&gt;
+## attr(,&quot;inla.read.only&quot;)
+## [1] TRUE
+## 
+## $from.theta
+## function (x) 
+## exp(x)
+## &lt;bytecode: 0x00000190b75ac1e8&gt;
+## &lt;environment: 0x00000190b75b2368&gt;
+## attr(,&quot;inla.read.only&quot;)
+## [1] TRUE</code></pre>
+<pre class="r"><code>## ----eval = FALSE-------------------------------------------------------------
+## hyper = list(prec = list(prior = &quot;gaussian&quot;, param = c(0, 0.001)))
+
+
+## -----------------------------------------------------------------------------
+m.pois.iid.gp &lt;- inla(SID74 ~ f(ID, model = &quot;iid&quot;,
+    hyper = list(theta = list(prior = &quot;gaussian&quot;, param = c(0, 0.001)))),
+  data = nc.sids, family = &quot;poisson&quot;,
+  E = EXP74)
+summary(m.pois.iid.gp)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.702, Running = 0.359, Post = 0.0577, Total = 1.12 
+## Fixed effects:
+##               mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## (Intercept) -0.033 0.064     -0.163   -0.031       0.09   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     ID IID model
+## 
+## Model hyperparameters:
+##                  mean   sd 0.025quant 0.5quant 0.975quant mode
+## Precision for ID 6.52 2.15       3.49     6.14      11.69   NA
+## 
+## Marginal log-Likelihood:  -241.89 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## ----eval = FALSE-------------------------------------------------------------
+## hyper = list(theta = list(prior = &quot;gaussian&quot;, param = c(0, 0.001)))
+
+
+## ----eval = FALSE-------------------------------------------------------------
+## hyper = list(theta1 = list(...), theta2 = list(...))
+
+
+## -----------------------------------------------------------------------------
+inla.models()$latent$rw1$constr</code></pre>
+<pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+inla.models()$latent$iid$constr</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+m.pois.iid.gp0 &lt;- inla(SID74 ~ f(ID, model = &quot;iid&quot;, constr = TRUE),
+  data = nc.sids, family = &quot;poisson&quot;, E = EXP74)
+
+summary(m.pois.iid.gp0)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.715, Running = 0.361, Post = 0.0588, Total = 1.14 
+## Fixed effects:
+##               mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## (Intercept) -0.027 0.049     -0.125   -0.027      0.066   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     ID IID model
+## 
+## Model hyperparameters:
+##                  mean   sd 0.025quant 0.5quant 0.975quant mode
+## Precision for ID 7.26 2.57       3.80     6.77      13.57   NA
+## 
+## Marginal log-Likelihood:  -245.56 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## ----eval = FALSE-------------------------------------------------------------
+## A &lt;- matrix(1, ncol = n, nrow = 1)
+## e &lt;- rep(0, 1)
+## 
+## inla( ... ~ ... + f(..., extraconstr = list(A, e), ...), ...)
+
+
+## -----------------------------------------------------------------------------
+n &lt;- nrow(nc.sids)
+A &lt;- matrix(1, ncol = n, nrow = 1)
+e &lt;- rep(0, 1)
+m.pois.iid.extrac &lt;- inla(SID74 ~ 
+    f(ID, model = &quot;iid&quot;, extraconstr = list(A = A, e = e)),
+  data = nc.sids, family = &quot;poisson&quot;, E = EXP74)
+
+summary(m.pois.iid.extrac)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.712, Running = 0.313, Post = 0.0609, Total = 1.09 
+## Fixed effects:
+##               mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## (Intercept) -0.027 0.049     -0.125   -0.027      0.066   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     ID IID model
+## 
+## Model hyperparameters:
+##                  mean   sd 0.025quant 0.5quant 0.975quant mode
+## Precision for ID 7.26 2.57       3.80     6.77      13.55   NA
+## 
+## Marginal log-Likelihood:  -245.56 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+airp.rw1.scale &lt;- inla(log(AirPassengers) ~ 0 + year +
+    f(ID, model = &quot;rw1&quot;, scale.model = TRUE),
+  control.family = list(hyper = list(prec = list(param = c(1, 0.2)))),
+  data = airp.data)
+
+summary(airp.rw1.scale)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.837, Running = 0.453, Post = 0.135, Total = 1.43 
+## Fixed effects:
+##           mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## year1949 5.157 0.252      4.665    5.156      5.655   NA   0
+## year1950 5.207 0.220      4.777    5.207      5.641   NA   0
+## year1951 5.332 0.190      4.959    5.332      5.707   NA   0
+## year1952 5.420 0.165      5.097    5.420      5.745   NA   0
+## year1953 5.490 0.146      5.203    5.490      5.776   NA   0
+## year1954 5.517 0.135      5.251    5.517      5.782   NA   0
+## year1955 5.602 0.135      5.336    5.602      5.867   NA   0
+## year1956 5.670 0.146      5.382    5.670      5.955   NA   0
+## year1957 5.727 0.165      5.401    5.727      6.050   NA   0
+## year1958 5.736 0.190      5.361    5.736      6.108   NA   0
+## year1959 5.806 0.219      5.375    5.807      6.237   NA   0
+## year1960 5.843 0.251      5.349    5.843      6.336   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     ID RW1 model
+## 
+## Model hyperparameters:
+##                                           mean    sd 0.025quant 0.5quant
+## Precision for the Gaussian observations 100.81 18.25      68.82    99.52
+## Precision for ID                          7.24  1.95       4.31     6.94
+##                                         0.975quant mode
+## Precision for the Gaussian observations     140.47   NA
+## Precision for ID                             11.92   NA
+## 
+## Marginal log-Likelihood:  -221.26 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## ----label = &quot;scale-model&quot;, fig = TRUE, fig.width = 8, fig.height = 2.2, echo = FALSE, fig.cap = &quot;Non-scaled versus scaled models. Point estimates (i.e., posterior means) of the random effects (left) and posterior marginal of the precision of the random effect (right).&quot;----
+# ggplot version
+
+tab &lt;- data.frame(nonscaled = airp.rw1$summary.random$ID[, &quot;mean&quot;],
+  scaled = airp.rw1.scale$summary.random$ID[, &quot;mean&quot;])
+p1 &lt;- ggplot(tab, aes(x = nonscaled, y = scaled)) + geom_point() +
+  xlab(&quot;Non-scaled model&quot;) +
+  ylab(&quot;Scaled model&quot;) +
+  geom_abline(intercept = 0, slope = 1)
+
+tab &lt;- data.frame(x = c(airp.rw1$marginals.hyperpar[[2]][, 1],
+    airp.rw1.scale$marginals.hyperpar[[2]][, 1]),
+  y = c(airp.rw1$marginals.hyperpar[[2]][, 2],
+    airp.rw1.scale$marginals.hyperpar[[2]][, 2]),
+  lab = rep(c(&quot;Non-scaled model&quot;, &quot;Scaled model&quot;), 
+    c(nrow(airp.rw1$marginals.hyperpar[[2]]),
+      nrow(airp.rw1.scale$marginals.hyperpar[[2]])))
+)
+p2 &lt;- ggplot(tab, aes(x = x, y = y, linetype = lab)) + geom_line() +
+  xlab(&quot;precision&quot;) +
+  ylab(&quot;density&quot;) +
+  xlim(0, 300) +
+  theme(legend.position = c(0.75, 0.8), legend.title = element_blank())
+
+grid.arrange(p1, p2, ncol = 2)</code></pre>
+<p><img src="figs/02-INLA-unnamed-chunk-2-5.png" width="672" /></p>
+<pre class="r"><code>## -----------------------------------------------------------------------------
+airp.data$month.num &lt;- as.numeric(airp.data$month)
+airp.data$year.num &lt;- as.numeric(airp.data$year)
+airp.iid.ar1 &lt;- inla(log(airp) ~ 0 +  f(year.num, model = &quot;iid&quot;,
+    group = month.num, control.group = list(model = &quot;ar1&quot;, 
+    scale.model = TRUE)),
+  data = airp.data)
+summary(airp.iid.ar1)</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 0.737, Running = 0.326, Post = 0.0764, Total = 1.14 
+## Random effects:
+##   Name     Model
+##     year.num IID model
+## 
+## Model hyperparameters:
+##                                             mean      sd 0.025quant
+## Precision for the Gaussian observations 2.48e+04 1.7e+04   6097.906
+## Precision for year.num                  4.90e-02 2.0e-02      0.020
+## GroupRho for year.num                   1.00e+00 0.0e+00      0.999
+##                                         0.5quant 0.975quant mode
+## Precision for the Gaussian observations 2.05e+04   6.97e+04   NA
+## Precision for year.num                  4.60e-02   9.80e-02   NA
+## GroupRho for year.num                   1.00e+00   1.00e+00   NA
+## 
+## Marginal log-Likelihood:  43.48 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>## ----eval = FALSE, label = &quot;iid-ar1-grouped2&quot;, fig = TRUE, echo = FALSE, fig.cap = &quot;Grouped effects for the air passengers dataset. Solid lines represent the posterior means and the dashed lines 95% credible intervals.&quot;----
+## par(mfrow = c(4, 3))
+## par(mar = c(3, 1.5, 1.5, 1.5))
+## #Table with summary of random effects; ID is for the YEAR
+## tab &lt;-  airp.iid.ar1$summary.random$year.num
+## x.years &lt;- 1949:1960
+## 
+## for(month in 1:12) {
+##   aux &lt;- tab[(month-1) * 12 + 1:12, ]
+## 
+##   plot(x.years, aux[, &quot;mean&quot;], type = &quot;l&quot;, xlab = &quot;&quot;, ylab = &quot;&quot;,
+##     main = paste0(&quot;Month &quot;, month), ylim = c(4, 6.5), las = 2, cex.axis = 0.75)
+##   lines(x.years, aux[, &quot;0.025quant&quot;], lty = 2)
+##   lines(x.years, aux[, &quot;0.975quant&quot;], lty = 2)
+## }
+
+
+## ----eval = TRUE, label = &quot;iid-ar1-grouped&quot;, fig = TRUE, echo = FALSE, fig.cap = &quot;Grouped effects for the air passengers dataset. Solid lines represent the posterior means and the dashed lines 95% credible intervals.&quot;, fig.width = 8, fig.height = 5.3----
+
+# ggplot version
+#Table with summary of random effects; ID is for the YEAR
+tab &lt;-  airp.iid.ar1$summary.random$year.num
+tab$year &lt;- (1949:1960)[tab$ID]
+tab$month &lt;- factor(rep(paste(&quot;Month &quot;, 1:12, sep = &quot;&quot;), each = 12),
+  levels = paste(&quot;Month &quot;, 1:12, sep = &quot;&quot;))
+
+# Rename quantiles
+names(tab)[c(4, 6)] &lt;- c(&quot;q025&quot;, &quot;q975&quot;)
+
+ggplot(tab, aes(x = year, y = mean)) + geom_line() +
+  facet_wrap(~ month, ncol = 3) +
+  geom_line(aes(x = year, y = q025), linetype = 2) + 
+  geom_line(aes(x = year, y = q975), linetype = 2) +
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(),
+    axis.text.x = element_text(angle = 90, size = 8)) +
+  scale_x_continuous(breaks = seq(1949, 1960, 1))</code></pre>
+<p><img src="figs/02-INLA-unnamed-chunk-2-6.png" width="672" /></p>
+<pre class="r"><code>library(lwgeom)
+library(raster)
+
+m &lt;- getData(name = &quot;GADM&quot;, country = &quot;Spain&quot;, level = 0)
+plot(m)</code></pre>
+<p><img src="figs/03-GLMM-unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code>library(sf)
+library(dplyr)
+library(ggplot2)
+
+#西班牙主要领土（无岛屿）
+m &lt;- m %&gt;%
+  st_as_sf() %&gt;%
+  st_cast(&quot;POLYGON&quot;) %&gt;%
+  mutate(area = st_area(.)) %&gt;%
+  arrange(desc(area)) %&gt;%
+  slice(1)
+
+#unit由经纬度transfer成 m
+m &lt;- m %&gt;% st_transform(25830)
+ggplot(m) + geom_sf() + theme_bw() + coord_sf(datum = st_crs(m))</code></pre>
+<p><img src="figs/03-GLMM-unnamed-chunk-3-2.png" width="672" /></p>
+<pre class="r"><code>library(readr)
+d &lt;- read_csv(&quot;PM25.csv&quot;)
+
+
+
+d &lt;- d[, c(
+  &quot;ReportingYear&quot;, &quot;StationLocalId&quot;,
+  &quot;SamplingPoint_Longitude&quot;,
+  &quot;SamplingPoint_Latitude&quot;,
+  &quot;AQValue&quot;
+)]
+names(d) &lt;- c(&quot;year&quot;, &quot;id&quot;, &quot;long&quot;, &quot;lat&quot;, &quot;value&quot;)
+
+
+p &lt;- st_as_sf(data.frame(long = d$long, lat = d$lat),
+              coords = c(&quot;long&quot;, &quot;lat&quot;))
+st_crs(p) &lt;- st_crs(4326)
+p &lt;- p %&gt;% st_transform(25830)
+d[, c(&quot;x&quot;, &quot;y&quot;)] &lt;- st_coordinates(p)
+
+
+ggplot(d) +
+  geom_histogram(mapping = aes(x = value)) +
+  facet_wrap(~year, ncol = 1) +
+  theme_bw()</code></pre>
+<p><img src="figs/03-GLMM-unnamed-chunk-3-3.png" width="672" /></p>
+<pre class="r"><code>ind &lt;- st_intersects(m, p)
+d &lt;- d[ind[[1]], ]
+
+ggplot(m) + geom_sf() + coord_sf(datum = st_crs(m)) +
+  geom_point(data = d, aes(x = x, y = y)) + theme_bw()</code></pre>
+<p><img src="figs/03-GLMM-unnamed-chunk-3-4.png" width="672" /></p>
+<pre class="r"><code>library(viridis)
+
+ggplot(m) + geom_sf() + coord_sf(datum = NA) +
+  geom_point(
+    data = d, aes(x = x, y = y, color = value),
+    size = 2
+  ) +
+  labs(x = &quot;&quot;, y = &quot;&quot;) +
+  scale_color_viridis() +
+  facet_wrap(~year) +
+  theme_bw()</code></pre>
+<p><img src="figs/03-GLMM-unnamed-chunk-3-5.png" width="672" /></p>
+<pre class="r"><code>library(INLA)
+
+coo &lt;- cbind(d$x, d$y) #coordinate
+bnd &lt;- inla.nonconvex.hull(st_coordinates(m)[, 1:2])
+mesh &lt;- inla.mesh.2d(
+  loc = coo, boundary = bnd,
+  max.edge = c(100000, 200000), cutoff = 1000
+)
+
+mesh$n #网格上的顶点</code></pre>
+<pre><code>## [1] 729</code></pre>
+<pre class="r"><code>plot(mesh)
+points(coo, col = &quot;red&quot;)</code></pre>
+<p><img src="figs/03-GLMM-unnamed-chunk-3-6.png" width="672" /></p>
+<pre class="r"><code>spde &lt;- inla.spde2.pcmatern(
+  mesh = mesh, alpha = 2, constr = TRUE,
+  prior.range = c(10000, 0.01), # P(range &lt; 10000) = 0.01
+  prior.sigma = c(3, 0.01) # P(sigma &gt; 3) = 0.01
+)  
+
+timesn &lt;- length(unique(d$year))
+indexs &lt;- inla.spde.make.index(&quot;s&quot;,
+                               n.spde = spde$n.spde,
+                               n.group = timesn
+)
+lengths(indexs)</code></pre>
+<pre><code>##       s s.group  s.repl 
+##    2187    2187    2187</code></pre>
+<pre class="r"><code>group &lt;- d$year - min(d$year) + 1
+A &lt;- inla.spde.make.A(mesh = mesh, loc = coo, group = group)
+
+bb &lt;- st_bbox(m)
+x &lt;- seq(bb$xmin - 1, bb$xmax + 1, length.out = 50)
+y &lt;- seq(bb$ymin - 1, bb$ymax + 1, length.out = 50)
+dp &lt;- as.matrix(expand.grid(x, y))
+plot(dp, asp = 1)</code></pre>
+<p><img src="figs/03-GLMM-unnamed-chunk-3-7.png" width="672" /></p>
+<pre class="r"><code>#保留西班牙位置
+p &lt;- st_as_sf(data.frame(x = dp[, 1], y = dp[, 2]),
+              coords = c(&quot;x&quot;, &quot;y&quot;)
+)
+st_crs(p) &lt;- st_crs(25830)  #西班牙 ESPG 代码（经纬度
+ind &lt;- st_intersects(m, p)
+dp &lt;- dp[ind[[1]], ]
+plot(dp, asp = 1)</code></pre>
+<p><img src="figs/03-GLMM-unnamed-chunk-3-8.png" width="672" /></p>
+<pre class="r"><code>#重复三次并添加一个表示时间的列来构造包含坐标和三次的数据
+dp &lt;- rbind(cbind(dp, 1), cbind(dp, 2), cbind(dp, 3))
+head(dp)</code></pre>
+<pre><code>##        Var1    Var2  
+## [1,] 260559 4004853 1
+## [2,] 218306 4022657 1
+## [3,] 239432 4022657 1
+## [4,] 260559 4022657 1
+## [5,] 281685 4022657 1
+## [6,] 218306 4040460 1</code></pre>
+<pre class="r"><code>#构建将空间连续高斯随机场从预测位置投影到网格节点的矩阵
+coop &lt;- dp[, 1:2]
+groupp &lt;- dp[, 3]
+Ap &lt;- inla.spde.make.A(mesh = mesh, loc = coop, group = groupp)
+
+
+
+
+
+stk.e &lt;- inla.stack(
+  tag = &quot;est&quot;,
+  data = list(y = d$value),
+  A = list(1, A),
+  effects = list(data.frame(b0 = rep(1, nrow(d))), s = indexs)
+)
+
+
+stk.p &lt;- inla.stack(
+  tag = &quot;pred&quot;,
+  data = list(y = NA),
+  A = list(1, Ap),
+  effects = list(data.frame(b0 = rep(1, nrow(dp))), s = indexs)
+)
+
+stk.full &lt;- inla.stack(stk.e, stk.p)
+
+rprior &lt;- list(theta = list(prior = &quot;pccor1&quot;, param = c(0, 0.9)))
+
+formula &lt;- y ~ 0 + b0 + f(s,
+                          model = spde, group = s.group,
+                          control.group = list(model = &quot;ar1&quot;, hyper = rprior)
+)
+
+res &lt;- inla(formula,
+            data = inla.stack.data(stk.full),
+            control.predictor = list(
+              compute = TRUE,
+              A = inla.stack.A(stk.full)
+            )
+)
+
+summary(res)#固定效应和随机效应的参数估计。</code></pre>
+<pre><code>## 
+## Call:
+##    c(&quot;inla.core(formula = formula, family = family, contrasts = 
+##    contrasts, &quot;, &quot; data = data, quantiles = quantiles, E = E, offset 
+##    = offset, &quot;, &quot; scale = scale, weights = weights, Ntrials = 
+##    Ntrials, strata = strata, &quot;, &quot; lp.scale = lp.scale, 
+##    link.covariates = link.covariates, verbose = verbose, &quot;, &quot; lincomb 
+##    = lincomb, selection = selection, control.compute = 
+##    control.compute, &quot;, &quot; control.predictor = control.predictor, 
+##    control.family = control.family, &quot;, &quot; control.inla = control.inla, 
+##    control.fixed = control.fixed, &quot;, &quot; control.mode = control.mode, 
+##    control.expert = control.expert, &quot;, &quot; control.hazard = 
+##    control.hazard, control.lincomb = control.lincomb, &quot;, &quot; 
+##    control.update = control.update, control.lp.scale = 
+##    control.lp.scale, &quot;, &quot; control.pardiso = control.pardiso, 
+##    only.hyperparam = only.hyperparam, &quot;, &quot; inla.call = inla.call, 
+##    inla.arg = inla.arg, num.threads = num.threads, &quot;, &quot; 
+##    blas.num.threads = blas.num.threads, keep = keep, 
+##    working.directory = working.directory, &quot;, &quot; silent = silent, 
+##    inla.mode = inla.mode, safe = FALSE, debug = debug, &quot;, &quot; 
+##    .parent.frame = .parent.frame)&quot;) 
+## Time used:
+##     Pre = 2.04, Running = 35.8, Post = 0.198, Total = 38 
+## Fixed effects:
+##     mean    sd 0.025quant 0.5quant 0.975quant mode kld
+## b0 8.544 0.295      7.967    8.543      9.126   NA   0
+## 
+## Random effects:
+##   Name     Model
+##     s SPDE2 model
+## 
+## Model hyperparameters:
+##                                             mean       sd 0.025quant
+## Precision for the Gaussian observations 9.02e-01    0.183   5.88e-01
+## Range for s                             1.80e+04 1811.293   1.46e+04
+## Stdev for s                             5.18e+00    0.414   4.43e+00
+## GroupRho for s                          9.66e-01    0.013   9.36e-01
+##                                         0.5quant 0.975quant mode
+## Precision for the Gaussian observations 8.87e-01   1.31e+00   NA
+## Range for s                             1.79e+04   2.18e+04   NA
+## Stdev for s                             5.16e+00   6.05e+00   NA
+## GroupRho for s                          9.68e-01   9.86e-01   NA
+## 
+## Marginal log-Likelihood:  -677.53 
+##  is computed 
+## Posterior summaries for the linear predictor and the fitted values are computed
+## (Posterior marginals needs also &#39;control.compute=list(return.marginals.predictor=TRUE)&#39;)</code></pre>
+<pre class="r"><code>list_marginals &lt;- list(
+  &quot;b0&quot; = res$marginals.fixed$b0,
+  &quot;precision Gaussian obs&quot; =
+    res$marginals.hyperpar$&quot;Precision for the Gaussian observations&quot;,
+  &quot;range&quot; = res$marginals.hyperpar$&quot;Range for s&quot;,
+  &quot;stdev&quot; = res$marginals.hyperpar$&quot;Stdev for s&quot;,
+  &quot;rho&quot; = res$marginals.hyperpar$&quot;GroupRho for s&quot;
+)
+
+
+marginals &lt;- data.frame(do.call(rbind, list_marginals))
+marginals$parameter &lt;- rep(names(list_marginals),
+                           times = sapply(list_marginals, nrow)
+)
+
+
+ggplot(marginals, aes(x = x, y = y)) + geom_line() +
+  facet_wrap(~parameter, scales = &quot;free&quot;) +
+  labs(x = &quot;&quot;, y = &quot;Density&quot;) + theme_bw()</code></pre>
+<p><img src="figs/03-GLMM-unnamed-chunk-3-9.png" width="672" /></p>
+<pre class="r"><code>#绘制空气污染预测图 95% 可信区间
+index &lt;- inla.stack.index(stack = stk.full, tag = &quot;pred&quot;)$data
+dp &lt;- data.frame(dp)
+names(dp) &lt;- c(&quot;x&quot;, &quot;y&quot;, &quot;time&quot;)
+
+dp$pred_mean &lt;- res$summary.fitted.values[index, &quot;mean&quot;]
+dp$pred_ll &lt;- res$summary.fitted.values[index, &quot;0.025quant&quot;]
+dp$pred_ul &lt;- res$summary.fitted.values[index, &quot;0.975quant&quot;]
+
+
+library(reshape2)
+dpm &lt;- melt(dp,
+            id.vars = c(&quot;x&quot;, &quot;y&quot;, &quot;time&quot;),
+            measure.vars = c(&quot;pred_mean&quot;, &quot;pred_ll&quot;, &quot;pred_ul&quot;)
+)
+head(dpm)</code></pre>
+<pre><code>##        x       y time  variable value
+## 1 260559 4004853    1 pred_mean 8.541
+## 2 218306 4022657    1 pred_mean 8.541
+## 3 239432 4022657    1 pred_mean 8.541
+## 4 260559 4022657    1 pred_mean 8.541
+## 5 281685 4022657    1 pred_mean 8.541
+## 6 218306 4040460    1 pred_mean 8.541</code></pre>
+<pre class="r"><code>ggplot(m) + geom_sf() + coord_sf(datum = NA) +
+  geom_tile(data = dpm, aes(x = x, y = y, fill = value)) +
+  labs(x = &quot;&quot;, y = &quot;&quot;) +
+  facet_wrap(variable ~ time) +
+  scale_fill_viridis(&quot;PM2.5&quot;) +
+  theme_bw()</code></pre>
+<p><img src="figs/03-GLMM-unnamed-chunk-3-10.png" width="672" /></p>
+</div>
+</div>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+

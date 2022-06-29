@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>A Hugo website</title>
+    <link>https://kunyanghe21.github.io/</link>
+    <description>Recent content on A Hugo website</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 29 Jun 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://kunyanghe21.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>SURF WEEK 3</title>
+      <link>https://kunyanghe21.github.io/2022/06/29/surf-week-3/</link>
+      <pubDate>Wed, 29 Jun 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://kunyanghe21.github.io/2022/06/29/surf-week-3/</guid>
+      <description>Time: 18:00-22:00, June 24th, 2022Venue: Tencent Meeting.Attendees: Chengxiu Ling, SURF team and volunteers (3+4), Master Students (4)
+Introduction to INLABayesian InferenceIn order to describe the models that INLA can fit, a vector of n observations \(\mathbf{y}=\left(y_{1}, \ldots, y_{n}\right)\) will be considered. Note that some of them may be missing observations. Furthermore, these observations will have an associated likelihood (not necessarily from the exponential family). In general, mean \(\mu_{i}\) of observation \(y_{i}\) can be linked to the linear predictor \(\eta_{i}\) via a convenient function.</description>
+    </item>
+    
+    <item>
+      <title>About</title>
+      <link>https://kunyanghe21.github.io/about/</link>
+      <pubDate>Thu, 05 May 2016 21:48:51 -0700</pubDate>
+      
+      <guid>https://kunyanghe21.github.io/about/</guid>
+      <description>This is a &amp;ldquo;hello world&amp;rdquo; example website for the blogdown package. The theme was forked from @jrutheiser/hugo-lithium-theme and modified by Yihui Xie.</description>
+    </item>
+    
+  </channel>
+</rss>
